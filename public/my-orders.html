@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | TechAlpha</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .orders-container { max-width: 800px; margin: 60px auto; padding: 0 20px; }
+        .order-card { background: #171717; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; }
+        .order-header p { color: #888; font-size: 0.9rem; }
+        .order-status { font-weight: bold; padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; }
+        .status-Pending { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+        .status-Shipped { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .status-Delivered { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .order-items p { color: #ededed; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1><a href="/" style="text-decoration:none; color:white;">TechAlpha</a></h1>
+        </div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/cart.html" class="cart-icon">🛒 Cart <span id="cart-count">0</span></a>
+        </nav>
+    </header>
+
+    <div class="orders-container">
+        <h2 style="margin-bottom: 30px;">My Orders</h2>
+        <div id="orders-list"></div>
+    </div>
+
+    <script>
+        async function fetchMyOrders() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login to see your orders.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/orders/myorders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const orders = await res.json();
+                
+                const list = document.getElementById('orders-list');
+                list.innerHTML = '';
+
+                if (orders.length === 0) {
+                    list.innerHTML = '<p style="color: #888;">You have not placed any orders yet.</p>';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const itemsHtml = order.items.map(item => `<p>• ${item.name} - $${item.price}</p>`).join('');
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <p>Order ID: ${order._id.substring(0, 8)}...</p>
+                            <span class="order-status status-${order.status}">${order.status}</span>
+                        </div>
+                        <div class="order-items">
+                            ${itemsHtml}
+                        </div>
+                        <p style="margin-top: 15px; font-weight: bold; color: #a855f7;">Total: $${order.totalAmount.toFixed(2)}</p>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        fetchMyOrders();
+    </script>
+</body>
+</html>

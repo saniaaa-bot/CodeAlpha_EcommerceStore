@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | TechAlpha</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background: #171717; border-right: 1px solid #222; padding: 30px 20px; }
+        .sidebar h2 { font-size: 1.5rem; color: #a855f7; margin-bottom: 40px; }
+        .sidebar a { display: block; color: #888; text-decoration: none; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; font-weight: 500; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+        .main-content { flex: 1; padding: 40px; background: #0a0a0a; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .top-bar h1 { font-size: 2rem; }
+        .logout-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-decoration: none; font-weight: 600; transition: 0.3s; }
+        .logout-btn:hover { background: #ef4444; color: white; }
+
+        .order-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .order-card { background: #171717; border: 1px solid #222; border-radius: 16px; padding: 25px; display: flex; justify-content: space-between; transition: 0.3s; }
+        .order-card:hover { border-color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .customer-info h3 { font-size: 1.2rem; margin-bottom: 5px; color: white; }
+        .customer-info p { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
+        .customer-info .contact-details { background: #0a0a0a; padding: 10px 15px; border-radius: 8px; border: 1px solid #222; display: inline-block; font-size: 0.9rem; color: #ededed; line-height: 1.5; }
+        
+        .order-details { text-align: right; min-width: 250px; }
+        .order-details .items-title { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .order-item { font-size: 0.95rem; color: #ededed; margin-bottom: 5px; }
+        .total-price { font-size: 1.5rem; font-weight: 800; color: #a855f7; margin: 15px 0; }
+        .empty-state { text-align: center; color: #888; padding: 50px; border: 1px dashed #333; border-radius: 16px; }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <div class="sidebar">
+            <h2>TechAlpha</h2>
+            <a href="#" class="active">📦 Orders</a>
+            <a href="/">🛍️ View Store</a>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Manage Orders</h1>
+                <a href="#" id="logoutBtn" class="logout-btn">Logout</a>
+            </div>
+
+            <div class="order-grid" id="orders-container">
+                <p style="color: #888;">Loading orders...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (localStorage.getItem('isAdmin') !== 'true') {
+            alert('Access Denied! Please login as Admin.');
+            window.location.href = '/login.html';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('userName');
+            window.location.href = '/login.html';
+        });
+
+        async function fetchOrders() {
+            try {
+                const res = await fetch('/api/orders');
+                const orders = await res.json();
+                
+                const container = document.getElementById('orders-container');
+                container.innerHTML = '';
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><h2>No orders yet</h2><p>When customers place orders, they will appear here.</p></div>';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const customerName = order.user ? order.user.name : 'Unknown Customer';
+                    const customerEmail = order.user ? order.user.email : 'No email';
+                    const customerPhone = order.phone || 'No phone provided';
+                    const customerAddress = order.address || 'No address provided';
+
+                    const itemsHtml = order.items.map(item => `<div class="order-item">• ${item.name} <span style="color:#888;">($${item.price})</span></div>`).join('');
+                    
+                    let statusColor = order.status === 'Delivered' ? '#22c55e' : (order.status === 'Shipped' ? '#3b82f6' : '#eab308');
+
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.innerHTML = `
+                        <div class="customer-info">
+                            <h3>${customerName}</h3>
+                            <p>${customerEmail}</p>
+                            <div class="contact-details">
+                                📞 ${customerPhone} <br>
+                                📍 ${customerAddress}
+                            </div>
+                        </div>
+                        <div class="order-details">
+                            <div class="items-title">Items Ordered</div>
+                            ${itemsHtml}
+                            <div class="total-price">$${order.totalAmount.toFixed(2)}</div>
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                                <span style="background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}50; padding: 6px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; display: inline-block;">● ${order.status}</span>
+                                <button onclick="updateStatus('${order._id}', '${order.status}')" style="background: #333; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.3s;" onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">Change</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Error loading orders:", error);
+                document.getElementById('orders-container').innerHTML = '<p style="color: #ef4444;">Error loading orders. Please try again.</p>';
+            }
+        }
+
+        async function updateStatus(orderId, currentStatus) {
+            const newStatus = prompt("Enter new status (Pending, Shipped, Delivered):", currentStatus);
+            if (!newStatus) return;
+
+            try {
+                await fetch(`/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                fetchOrders(); 
+            } catch (error) {
+                console.error("Error updating status:", error);
+            }
+        }
+
+        fetchOrders();
+    </script>
+</body>
+</html>

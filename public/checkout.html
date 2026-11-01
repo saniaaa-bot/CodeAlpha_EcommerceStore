@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | TechAlpha</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/" style="text-decoration:none; color:white;">TechAlpha</a></h1>
+    </header>
+    <main>
+        <div class="checkout-container">
+            <h2>Shipping Details</h2>
+            <form id="checkoutForm">
+                <input type="text" id="address" placeholder="Full Address" required>
+                <input type="text" id="phone" placeholder="Phone Number" required>
+                <div class="total-box">
+                    <h3>Total Amount: $<span id="checkout-total">0</span></h3>
+                </div>
+                <button type="submit" class="place-order-btn">Confirm Order</button>
+            </form>
+        </div>
+    </main>
+    <script>
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) window.location.href = '/cart.html';
+
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        document.getElementById('checkout-total').innerText = total.toFixed(2);
+
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login first!');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const address = document.getElementById('address').value;
+            const phone = document.getElementById('phone').value;
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ items: cart, totalAmount: total, address, phone })
+            });
+
+            if (res.ok) {
+                localStorage.removeItem('cart');
+                alert('🎉 Order Placed Successfully!');
+                window.location.href = '/';
+            } else {
+                alert('Error placing order.');
+            }
+        });
+    </script>
+</body>
+</html>

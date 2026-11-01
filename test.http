@@ -1,0 +1,90 @@
+### 
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "MacBook Pro M3",
+    "price": 1999.99,
+    "description": "Supercharged by M3 chips for extreme performance.",
+    "imageUrl": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "iPhone 15 Pro",
+    "price": 1099.00,
+    "description": "Titanium design with A17 Pro chip.",
+    "imageUrl": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "Sony Headphones",
+    "price": 399.99,
+    "description": "Industry-leading noise canceling.",
+    "imageUrl": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500"
+}
+
+###
+GET http://localhost:5000/api/products
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "Apple Watch Ultra 2",
+    "price": 799.00,
+    "description": "The most rugged and capable Apple Watch.",
+    "imageUrl": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "iPad Pro M4",
+    "price": 999.00,
+    "description": "Impossibly thin. Incredibly powerful.",
+    "imageUrl": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "AirPods Max",
+    "price": 549.00,
+    "description": "A perfect balance of high-fidelity audio.",
+    "imageUrl": "https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "PlayStation 5",
+    "price": 499.99,
+    "description": "Lightning fast loading and stunning visuals.",
+    "imageUrl": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500"
+}
+
+###
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+    "name": "Mechanical Keyboard",
+    "price": 129.99,
+    "description": "RGB backlit with tactile switches.",
+    "imageUrl": "https://images.unsplash.com/photo-1595225476474-87563907a212?w=500"
+}

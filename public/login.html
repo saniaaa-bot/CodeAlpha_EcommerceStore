@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | TechAlpha</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Welcome Back</h2>
+            <p>Login to continue shopping</p>
+            
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Email Address" required>
+                <input type="password" id="password" placeholder="Password" required>
+                
+                <!-- Admin Toggle -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <input type="checkbox" id="isAdmin" style="width: auto; margin: 0;">
+                    <label for="isAdmin" style="color: #ededed; font-size: 0.9rem; cursor: pointer;">Login as Admin</label>
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+            <p class="auth-switch">Don't have an account? <a href="/register.html">Sign up</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const isAdmin = document.getElementById('isAdmin').checked;
+
+            // FIX ADMIN LOGIN
+            if (isAdmin) {
+                if (email === "admin@techalpha.com" && password === "admin123") {
+                    localStorage.setItem('isAdmin', 'true');
+                    localStorage.setItem('userName', 'Admin');
+                    alert('Admin Login Successful!');
+                    window.location.href = '/admin.html';
+                    return;
+                } else {
+                    alert('Invalid Admin Credentials!\nUse: admin@techalpha.com / admin123');
+                    return;
+                }
+            }
+
+            // NORMAL USER LOGIN
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userName', data.user.name);
+                localStorage.removeItem('isAdmin');
+                alert('Login Successful!');
+                window.location.href = '/';
+            } else {
+                alert(data.message);
+            }
+        });
+    </script>
+</body>
+</html>
